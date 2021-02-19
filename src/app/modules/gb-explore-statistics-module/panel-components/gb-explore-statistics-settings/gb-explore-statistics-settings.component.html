@@ -1,0 +1,53 @@
+<p-accordionTab header="Settings" id="gb-explore-statistics-settings">
+  <div class="small-font">
+
+
+    <!--TODO find out why the ontology is not displayed-->
+    <!--TODO Modify the services -->
+    <!-- TODO when a concept or modifier is not numerical send an error message to the user -->
+    <!-- Generalize this component to avoid code duplication!!! -->
+
+    <!-- TODO modify the service that will handle the dropping of the concept.. -->
+    <div class="input-label-wrapper">
+      <div>
+        <label>
+          Medical Concept:
+        </label>
+      </div>
+      <div class="input-field-margin"
+        [ngStyle]="{'background-color' : eventHovering ? 'var(--gb-clinical-green-light-light)' : 'white'}"
+        (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onConceptDrop($event)">
+        <p-autoComplete #autoComplete [(ngModel)]="concept" [suggestions]="suggestedConcepts"
+          (completeMethod)="search($event)" field="path" (onDropDownClick)="onDropdown($event)"
+          placeholder="Drag and drop a medical concept" dropdown="true" [inputStyle]="{'width':'auto'}"
+          styleClass="gb-concept-constraint-input" size="60">
+
+          <ng-template let-concept pTemplate="item">
+            <span>{{concept.label}}</span>
+          </ng-template>
+        </p-autoComplete>
+      </div>
+    </div>
+
+    <div class="input-label-wrapper">
+      <div>
+        <label>Number of buckets:</label>
+      </div>
+      <input type="number" step="1" [(ngModel)]="numberOfBuckets" class="input-field input-field-margin"/>
+    </div>
+    <!-- TODO disable le button si aucun concept n'a été drag & drop
+      Tu pourrais mettre un alt dans ce cas.
+
+    disable le bouton quand la query est en train de run -->
+  <div class="input-label-wrapper">
+    
+    <!-- TODO generalize la classe gb-explore-query-btn-dirty -->
+    <button  type="button"
+      (click)="execQuery($event)" class="btn btn-outline-primary btn-sm gb-data-selection-update-btn
+      {{isDirty? 'gb-explore-query-btn-dirty' : ''}}">
+      Run query
+    </button> 
+  </div>
+ 
+  </div>
+</p-accordionTab>

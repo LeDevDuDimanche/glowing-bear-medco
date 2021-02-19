@@ -10,7 +10,6 @@
 
 import { Injectable } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { QueryService } from './query.service';
 import { Subject, Observable } from 'rxjs';
 import { OperationType } from 'app/models/operation-models/operation-types';
 import { AuthenticationService } from './authentication.service';
@@ -25,38 +24,52 @@ export class NavbarService {
 
   private _isExplore = true;
   private _isExploreResults = false;
+  private _isExploreStats = false
   private _isAnalysis = false;
   private _isSurvivalRes = new Array<boolean>();
 
   private _lastSuccessfulSurvival: number;
 
-  private EXPLORE_INDEX = 0;
-  private ANALYSIS_INDEX = 1;
+  private static get EXPLORE_INDEX() {return 0; }
+  private static get EXPLORE_STATISTICS_INDEX() { return 1; }
+  private static get ANALYSIS_INDEX() {return 2; }
+
+  private static get EXPLORE_ROUTE () { return '/explore'; }
+  private static get EXPLORE_STATS_ROUTE() { return '/explore-statistics'; }
+  private static get ANALYSIS_ROUTE() { return '/analysis'; }
 
   constructor(private authService: AuthenticationService, private router: Router) {
     this._selectedSurvivalId = new Subject<number>()
     this.items = [
 
       // 0: explore tab, default page
-      { label: OperationType.EXPLORE, routerLink: '/explore' },
+      { label: OperationType.EXPLORE, routerLink: NavbarService.EXPLORE_ROUTE },
 
-      // 1: survival analysis tab
-      { label: OperationType.ANALYSIS, routerLink: '/analysis', visible: this.authService.hasAnalysisAuth }
+      // 1: explore statistics tab
+      { label: OperationType.EXPLORE_STATISTICS, routerLink: NavbarService.EXPLORE_STATS_ROUTE },
+      
+      // 2: survival analysis tab
+      { label: OperationType.ANALYSIS, routerLink: NavbarService.ANALYSIS_ROUTE, visible: this.authService.hasAnalysisAuth }
+
     ];
   }
 
   updateNavbar(routerLink: string) {
-    this.isExplore = (routerLink === '/explore' || routerLink === '');
-    this.isAnalysis = (routerLink === '/analysis')
+    this.isExplore = (routerLink === NavbarService.EXPLORE_ROUTE || routerLink === '');
+    this._isExploreStats = (routerLink == NavbarService.EXPLORE_STATS_ROUTE)
+    this.isAnalysis = (routerLink === NavbarService.ANALYSIS_ROUTE)
+
     for (let i = 0; i < this.isSurvivalRes.length; i++) {
       this.isSurvivalRes[i] = (routerLink === `/survival/${i + 1}`)
     }
     console.log('Updated router link: ', routerLink)
 
     if (this.isExplore) {
-      this.activeItem = this._items[this.EXPLORE_INDEX];
+      this.activeItem = this._items[NavbarService.EXPLORE_INDEX];
+    } else if (this._isExploreStats) {
+      this.activeItem = this._items[NavbarService.EXPLORE_STATISTICS_INDEX];
     } else if (this.isAnalysis) {
-      this.activeItem = this._items[this.ANALYSIS_INDEX];
+      this.activeItem = this._items[NavbarService.ANALYSIS_INDEX];
     } else {
       for (let i = 0; i < this.isSurvivalRes.length; i++) {
         if (this.isSurvivalRes[i]) {
@@ -117,6 +130,10 @@ export class NavbarService {
 
   set isAnalysis(value: boolean) {
     this._isAnalysis = value
+  }
+
+  get isExploreStatistics(): boolean {
+    return this._isExploreStats
   }
 
   set isSurvivalRes(value: boolean[]) {

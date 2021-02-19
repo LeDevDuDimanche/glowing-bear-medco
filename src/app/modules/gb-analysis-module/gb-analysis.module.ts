@@ -34,12 +34,13 @@ import { SurvivalService } from 'app/services/survival-analysis.service';
 import { AnalysisService } from 'app/services/analysis.service';
 
 
+
 @NgModule({
   declarations: [
     GbCohortLandingZoneComponent,
     GbTopComponent,
     GbSurvivalSettingsComponent,
-    GbAnalysisComponent
+    GbAnalysisComponent,
   ],
   imports: [
     AccordionModule,
