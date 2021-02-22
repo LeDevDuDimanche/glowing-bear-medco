@@ -1,8 +1,11 @@
 import { Injectable } from "@angular/core";
-import { ApiExploreStatistics } from "app/models/api-request-models/survival-analyis/api-explore-statistics ";
+import { ApiExploreStatistics } from "app/models/api-request-models/survival-analyis/api-explore-statistics";
 import { Concept } from "app/models/constraint-models/concept";
 import { ErrorHelper } from "app/utilities/error-helper";
+import { forkJoin, Observable } from "rxjs";
+import { timeout } from "rxjs/operators";
 import { ApiEndpointService } from "./api-endpoint.service";
+import { MedcoNetworkService } from "./api/medco-network.service";
 import { CohortService } from "./cohort.service";
 import { CryptoService } from "./crypto.service";
 
@@ -11,8 +14,12 @@ export class ExploreStatisticsService {
     constructor(
         private apiEndpointService: ApiEndpointService,
         private cryptoService: CryptoService,
-        private cohortService: CohortService
+        private cohortService: CohortService,
+        private medcoNetworkService: MedcoNetworkService
     ) { }
+
+    //1 minute timeout
+    private static TIMEOUT_MS = 1000 * 60 * 1;
 
     private static getNewQueryID(): string {
         let d = new Date()
@@ -40,10 +47,20 @@ export class ExploreStatisticsService {
             }
         }
 
-        this.apiEndpointService.postCall(
-            'node/explore-statistics/query',
-            apiRequest
-        )
+        forkJoin(this.medcoNetworkService.nodesUrl.map(
+            url =>
+                this.apiEndpointService.postCall(
+                    'node/explore-statistics/query',
+                    apiRequest,
+                    url
+                )
+        ))
+        .pipe(timeout(ExploreStatisticsService.TIMEOUT_MS))
+        .subscribe(results => {
+            console.log("Explore statistics request results ", results)
+        })
+
+
     }
 
 }

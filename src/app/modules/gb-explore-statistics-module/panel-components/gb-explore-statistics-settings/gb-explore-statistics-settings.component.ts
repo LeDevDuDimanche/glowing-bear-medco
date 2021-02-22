@@ -11,9 +11,7 @@ import { AutoComplete } from 'primeng/autocomplete';
 import { TreeNodeService } from 'app/services/tree-node.service';
 import { GbConceptFormComponent } from 'app/modules/concept-form-component/gb-concept-form.component';
 import { ExploreStatisticsService } from 'app/services/explore-statistics.service';
-import { ApiExploreStatistics } from 'app/models/api-request-models/survival-analyis/api-explore-statistics ';
 import { ErrorHelper } from 'app/utilities/error-helper';
-import { CryptoService } from 'app/services/crypto.service';
 
 @Component({
   selector: 'gb-explore-statistics-settings',
@@ -55,21 +53,19 @@ export class GbExploreStatisticsSettingsComponent extends GbConceptFormComponent
   }
 
   execQuery(event: Event) {
-    if (this.isDirty) {
-      throw ErrorHelper.handleNewError('Please wait for the query that is running to finish its execution')
-    }
-
-    this.isDirty = true
-
-
     if (!this.concept) {
       throw ErrorHelper.handleNewError('Please select a concept or modifier used in this query')
     }
 
+    if (this.isDirty) {
+      throw ErrorHelper.handleNewError('Please wait for the query that is running to finish its execution')
+    }
+    this.isDirty = true
 
-    this.exploreStatisticsService.executeQuery(this.concept, this._numberOfBuckets)
-    //TODO fetch the selected cohort name.
-    //TODO call a service that will handle the query. ExploreStatisticsService
-    this.isDirty = false
+    try {
+      this.exploreStatisticsService.executeQuery(this.concept, this._numberOfBuckets)
+    } finally {
+      this.isDirty = false
+    }
   }
 }
