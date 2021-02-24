@@ -47,12 +47,12 @@ export class ExploreStatisticsService {
             }
         }
 
-        forkJoin(this.medcoNetworkService.nodesUrl.map(
-            url =>
+        forkJoin(this.medcoNetworkService.nodes.map(
+            node =>
                 this.apiEndpointService.postCall(
                     'node/explore-statistics/query',
                     apiRequest,
-                    url
+                    node.url
                 )
         ))
         .pipe(timeout(ExploreStatisticsService.TIMEOUT_MS))
