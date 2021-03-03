@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { ApiExploreStatistics } from "app/models/api-request-models/survival-analyis/api-explore-statistics";
+import { ApiExploreStatisticsResponse, ApiInterval } from "app/models/api-response-models/explore-statistics/explore-statistics-response";
 import { Concept } from "app/models/constraint-models/concept";
 import { ErrorHelper } from "app/utilities/error-helper";
 import { forkJoin, Observable } from "rxjs";
@@ -8,6 +9,7 @@ import { ApiEndpointService } from "./api-endpoint.service";
 import { MedcoNetworkService } from "./api/medco-network.service";
 import { CohortService } from "./cohort.service";
 import { CryptoService } from "./crypto.service";
+
 
 @Injectable()
 export class ExploreStatisticsService {
@@ -41,12 +43,14 @@ export class ExploreStatisticsService {
         }
 
         if (concept.modifier) {
+            apiRequest.concept = concept.modifier.appliedConceptPath
             apiRequest.modifier = {
                 ModifierKey: concept.modifier.path,
                 AppliedPath: concept.modifier.appliedPath
             }
         }
 
+        console.log("Api request: ", apiRequest)
         forkJoin(this.medcoNetworkService.nodes.map(
             node =>
                 this.apiEndpointService.postCall(
@@ -56,8 +60,18 @@ export class ExploreStatisticsService {
                 )
         ))
         .pipe(timeout(ExploreStatisticsService.TIMEOUT_MS))
-        .subscribe(results => {
+        .subscribe((results: Array<ApiExploreStatisticsResponse>) => {
             console.log("Explore statistics request results ", results)
+            if (results == undefined || results.length <= 0) {
+                ErrorHelper.handleNewError("Error with the server. Empty result.")
+            }
+
+            const response = results[0]
+            response.intervals.forEach((interval: ApiInterval) => {
+                const clearCount = this.cryptoService.decryptIntegerWithEphemeralKey(interval.encCount)
+                console.log("Clear count for [", interval.lowerBound, ", ", interval.higherBound, "] is ", clearCount)
+            })
+
         })
 
 

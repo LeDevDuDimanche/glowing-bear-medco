@@ -57,6 +57,10 @@ export class GbExploreStatisticsSettingsComponent extends GbConceptFormComponent
       throw ErrorHelper.handleNewError('Please select a concept or modifier used in this query')
     }
 
+    if (!this._numberOfBuckets) {
+      throw ErrorHelper.handleNewError('Please specify the number of intervals in which the numerical values of the concept will be grouped into')
+    }
+
     if (this.isDirty) {
       throw ErrorHelper.handleNewError('Please wait for the query that is running to finish its execution')
     }
