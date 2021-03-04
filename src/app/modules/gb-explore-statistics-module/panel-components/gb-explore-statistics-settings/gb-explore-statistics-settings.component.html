@@ -3,7 +3,7 @@
 
 
     <!-- TODO when a concept or modifier is not numerical send an error message to the user -->
-    <!-- Generalize this component to avoid code duplication!!! -->
+    <!-- TODO Generalize this component to avoid code duplication!!! For example the drop down can be made a component common between survival curves and this component-->
 
     <!-- TODO modify the service that will handle the dropping of the concept.. -->
     <div class="input-label-wrapper">
@@ -31,21 +31,20 @@
       <div>
         <label>Number of buckets:</label>
       </div>
-      <input type="number" min="1" step="1" [(ngModel)]="numberOfBuckets" class="input-field input-field-margin"/>
-    </div>
-    <!-- TODO disable le button si aucun concept n'a été drag & drop
-      Tu pourrais mettre un alt dans ce cas.
+      <input type="number" min="1" step="1" [(ngModel)]="numberOfBuckets" class="input-field input-field-margin" />
+    </div> 
 
-    disable le bouton quand la query est en train de run -->
-  <div class="input-label-wrapper">
-    
-    <!-- TODO generalize la classe gb-explore-query-btn-dirty -->
-    <button  type="button"
-      (click)="execQuery($event)" class="btn btn-outline-primary btn-sm gb-data-selection-update-btn
-      {{isDirty? 'gb-explore-query-btn-dirty' : ''}}">
-      Run query
-    </button> 
-  </div>
- 
+    <div class="input-label-wrapper">
+
+      <button type="button" (click)="execQuery($event)" [disabled]="isDirty ? '' : null"
+        class="btn btn-outline-primary btn-sm {{isDirty? 'query-btn-dirty' : ''}}">
+        Run query
+      </button>
+    </div>
+
+    <div style="margin: auto;" class="{{ !isDirty ? 'non-visible' : '' }} fade-in-fade-out ">
+      <p class="loading-blink"><span>•</span><span>•</span><span>•</span></p>
+    </div>
+
   </div>
 </p-accordionTab>

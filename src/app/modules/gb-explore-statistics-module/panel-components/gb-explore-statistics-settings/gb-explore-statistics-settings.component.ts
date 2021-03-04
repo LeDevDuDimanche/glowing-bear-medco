@@ -75,8 +75,9 @@ export class GbExploreStatisticsSettingsComponent extends GbConceptFormComponent
         this.isDirty = false
       })
 
-    } finally {
+    } catch (e) {
       this.isDirty = false
+      throw e
     }
   }
 }

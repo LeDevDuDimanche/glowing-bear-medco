@@ -25,3 +25,15 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+
+.non-visible {
+  max-height: 0 !important;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.fade-in-fade-out {
+  max-height: 500px;
+  transition: max-height 0.75s ease-in;
+}
+ 
