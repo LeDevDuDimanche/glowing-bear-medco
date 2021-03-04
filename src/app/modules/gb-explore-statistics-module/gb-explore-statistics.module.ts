@@ -25,6 +25,7 @@ import {MultiSelectModule} from 'primeng/multiselect';
 import {GbSelectionModule} from '../gb-explore-module/gb-selection-component/gb-selection.module';
 import { GbExploreStatisticsSettingsComponent } from './panel-components/gb-explore-statistics-settings/gb-explore-statistics-settings.component';
 import { ExploreStatisticsService } from 'app/services/explore-statistics.service';
+import { GbExploreStatisticsResultsComponent } from './panel-components/gb-explore-statistics-results/gb-explore-statistics-results.component';
 
 @NgModule({
   imports: [
@@ -46,7 +47,8 @@ import { ExploreStatisticsService } from 'app/services/explore-statistics.servic
   ],
   declarations: [
     GbExploreStatisticsComponent,
-    GbExploreStatisticsSettingsComponent
+    GbExploreStatisticsSettingsComponent,
+    GbExploreStatisticsResultsComponent
   ],
   entryComponents: [
     GbConstraintComponent,

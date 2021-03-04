@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, Output, EventEmitter } from "@angular/core";
 import { ApiExploreStatistics } from "app/models/api-request-models/survival-analyis/api-explore-statistics";
 import { ApiExploreStatisticsResponse, ApiInterval } from "app/models/api-response-models/explore-statistics/explore-statistics-response";
 import { Concept } from "app/models/constraint-models/concept";
@@ -10,6 +10,29 @@ import { MedcoNetworkService } from "./api/medco-network.service";
 import { CohortService } from "./cohort.service";
 import { CryptoService } from "./crypto.service";
 
+export class Interval {
+    count: number
+    higherBound: string
+    lowerBound: string
+
+    constructor(i: ApiInterval, cryptoService: CryptoService) {
+        this.count = cryptoService.decryptIntegerWithEphemeralKey(i.encCount)
+        this.higherBound = i.higherBound
+        this.lowerBound = i.lowerBound
+        console.log("Clear count for [", this.lowerBound, ", ", this.higherBound, "] is ", this.count)
+    }
+}
+
+export class ChartInformation {
+    intervals: Interval[]
+    unit: string
+
+    constructor(apiResponse: ApiExploreStatisticsResponse, cryptoService: CryptoService) {
+        this.unit = apiResponse.unit
+        this.intervals = apiResponse.intervals.map((i: ApiInterval) => new Interval(i, cryptoService))
+    }
+
+}
 
 @Injectable()
 export class ExploreStatisticsService {
@@ -19,6 +42,9 @@ export class ExploreStatisticsService {
         private cohortService: CohortService,
         private medcoNetworkService: MedcoNetworkService
     ) { }
+
+    //Sends the result of the latest query when is is available
+    @Output() ChartDataEmitter: EventEmitter<ChartInformation> = new EventEmitter()
 
     //1 minute timeout
     private static TIMEOUT_MS = 1000 * 60 * 1;
@@ -51,29 +77,29 @@ export class ExploreStatisticsService {
         }
 
         console.log("Api request: ", apiRequest)
-        forkJoin(this.medcoNetworkService.nodes.map(
-            node =>
-                this.apiEndpointService.postCall(
-                    'node/explore-statistics/query',
-                    apiRequest,
-                    node.url
-                )
-        ))
-        .pipe(timeout(ExploreStatisticsService.TIMEOUT_MS))
-        .subscribe((results: Array<ApiExploreStatisticsResponse>) => {
+
+        const obs = forkJoin(this.medcoNetworkService.nodes
+            .map(
+                node =>
+                    this.apiEndpointService.postCall(
+                        'node/explore-statistics/query',
+                        apiRequest,
+                        node.url
+                    )
+            ))
+            .pipe(timeout(ExploreStatisticsService.TIMEOUT_MS))
+
+
+        obs.subscribe((results: Array<ApiExploreStatisticsResponse>) => {
             console.log("Explore statistics request results ", results)
             if (results == undefined || results.length <= 0) {
                 ErrorHelper.handleNewError("Error with the server. Empty result.")
             }
 
-            const response = results[0]
-            response.intervals.forEach((interval: ApiInterval) => {
-                const clearCount = this.cryptoService.decryptIntegerWithEphemeralKey(interval.encCount)
-                console.log("Clear count for [", interval.lowerBound, ", ", interval.higherBound, "] is ", clearCount)
-            })
-
+            //Store the clear counts within the chart information class instance
+            const chartInfo = new ChartInformation(results[0], this.cryptoService)
+            this.ChartDataEmitter.emit(chartInfo)
         })
-
 
     }
 

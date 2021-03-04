@@ -53,21 +53,28 @@ export class GbExploreStatisticsSettingsComponent extends GbConceptFormComponent
   }
 
   execQuery(event: Event) {
-    if (!this.concept) {
-      throw ErrorHelper.handleNewError('Please select a concept or modifier used in this query')
+
+    if (this._numberOfBuckets < 1) {
+      throw ErrorHelper.handleNewError('Please make the number of buckets bigger or equal to 1')
     }
 
-    if (!this._numberOfBuckets) {
-      throw ErrorHelper.handleNewError('Please specify the number of intervals in which the numerical values of the concept will be grouped into')
+    if (!this.concept) {
+      throw ErrorHelper.handleNewError('Please select a concept or modifier used in this query')
     }
 
     if (this.isDirty) {
       throw ErrorHelper.handleNewError('Please wait for the query that is running to finish its execution')
     }
+
     this.isDirty = true
 
     try {
       this.exploreStatisticsService.executeQuery(this.concept, this._numberOfBuckets)
+      
+      this.exploreStatisticsService.ChartDataEmitter.subscribe(_ => {
+        this.isDirty = false
+      })
+
     } finally {
       this.isDirty = false
     }

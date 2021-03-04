@@ -1,9 +1,7 @@
-<p-accordionTab header="Settings" id="gb-explore-statistics-settings">
+<p-accordionTab header="Settings" id="gb-explore-statistics-settings" [selected]="true">
   <div class="small-font">
 
 
-    <!--TODO find out why the ontology is not displayed-->
-    <!--TODO Modify the services -->
     <!-- TODO when a concept or modifier is not numerical send an error message to the user -->
     <!-- Generalize this component to avoid code duplication!!! -->
 
@@ -33,7 +31,7 @@
       <div>
         <label>Number of buckets:</label>
       </div>
-      <input type="number" step="1" [(ngModel)]="numberOfBuckets" class="input-field input-field-margin"/>
+      <input type="number" min="1" step="1" [(ngModel)]="numberOfBuckets" class="input-field input-field-margin"/>
     </div>
     <!-- TODO disable le button si aucun concept n'a été drag & drop
       Tu pourrais mettre un alt dans ce cas.
