@@ -36,7 +36,7 @@
 
     <div class="input-label-wrapper">
 
-      <button type="button" (click)="execQuery($event)" [disabled]="isDirty ? '' : null"
+      <button type="button" (click)="execQuery($event)" [disabled]="isDirty"
         class="btn btn-outline-primary btn-sm {{isDirty? 'query-btn-dirty' : ''}}">
         Run query
       </button>
