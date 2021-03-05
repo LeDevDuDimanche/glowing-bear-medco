@@ -68,15 +68,11 @@ export class GbExploreStatisticsSettingsComponent extends GbConceptFormComponent
 
     this.isDirty = true
 
+    const onDone = () => { this.isDirty = false; }
     try {
-      this.exploreStatisticsService.executeQuery(this.concept, this._numberOfBuckets)
-      
-      this.exploreStatisticsService.ChartDataEmitter.subscribe(_ => {
-        this.isDirty = false
-      })
-
+      this.exploreStatisticsService.executeQuery(this.concept, this._numberOfBuckets, onDone)
     } catch (e) {
-      this.isDirty = false
+      onDone()
       throw e
     }
   }

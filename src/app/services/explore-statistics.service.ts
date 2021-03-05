@@ -56,7 +56,7 @@ export class ExploreStatisticsService {
             `${d.getUTCMinutes()}${d.getUTCSeconds()}${d.getUTCMilliseconds()}`)
     }
 
-    executeQuery(concept: Concept, numberOfBuckets: number) {
+    executeQuery(concept: Concept, numberOfBuckets: number, onExecuted: () => any) {
         if (!this.cohortService.selectedCohort || !this.cohortService.selectedCohort.name) {
             throw ErrorHelper.handleNewError('Please select a cohort on the left located cohort selection menu.')
         }
@@ -95,16 +95,23 @@ export class ExploreStatisticsService {
 
         const displayedName = concept.modifier ? this.getModifierDisplayName(concept.modifier) : concept.name
 
-        obs.subscribe((results: Array<ApiExploreStatisticsResponse>) => {
-            console.log("Explore statistics request results ", results)
-            if (results == undefined || results.length <= 0) {
-                ErrorHelper.handleNewError("Error with the server. Empty result.")
+        obs.subscribe(
+            (results: Array<ApiExploreStatisticsResponse>) => {
+                console.log("Explore statistics request results ", results)
+                if (results == undefined || results.length <= 0) {
+                    ErrorHelper.handleNewError("Error with the server. Empty result.")
+                }
+
+                //Store the clear counts within the chart information class instance
+                const chartInfo = new ChartInformation(results[0], this.cryptoService, displayedName, apiRequest.cohortName)
+                this.ChartDataEmitter.emit(chartInfo)
+                onExecuted()
+            }, 
+            err => {
+                onExecuted()
             }
 
-            //Store the clear counts within the chart information class instance
-            const chartInfo = new ChartInformation(results[0], this.cryptoService, displayedName, apiRequest.cohortName)
-            this.ChartDataEmitter.emit(chartInfo)
-        })
+        )
 
     }
 
