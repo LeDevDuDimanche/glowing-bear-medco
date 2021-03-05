@@ -48,12 +48,32 @@ export class GbExploreStatisticsResultsComponent implements OnInit, OnChanges {
   private updateChart(chartInfo: ChartInformation) {
     if (chartInfo && chartInfo.intervals && chartInfo.intervals.length > 0) {
       this.chart.data.labels = chartInfo.intervals.map(i => "[" + i.lowerBound + ", " + i.higherBound + "]");
-      this.chart.data.datasets[0].data = chartInfo.intervals.map(i => i.count);
-      this.chart.data.datasets[0].backgroundColor = chartInfo.intervals.map((_, index) => GbExploreStatisticsResultsComponent.getBackgroundColor(index))
+      this.chart.data.datasets[0] = {
+        data: chartInfo.intervals.map(i => i.count),
+        backgroundColor: chartInfo.intervals.map((_, index) => GbExploreStatisticsResultsComponent.getBackgroundColor(index))
+      }
 
       var min, max: number
       max = chartInfo.intervals[0].count
       min = max
+
+      this.chart.options = {
+        legend: {
+          display: false
+        },
+        title: {
+          text: "Histogram for the `" + chartInfo.treeNodeName + "` concept in the context of the `" + chartInfo.cohortName + "` cohort ",
+          display: true
+        },
+        scales: {
+          xAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: "TODO x axis unit",
+            }
+          }]
+        }
+      }
 
       chartInfo.intervals.forEach(v => {
         if (max < v.count) {
@@ -88,7 +108,7 @@ export class GbExploreStatisticsResultsComponent implements OnInit, OnChanges {
       data: {
         labels: [],
         datasets: [{
-          label: 'Number of observations',
+          // label: 'Number of observations',
           data: []
         }]
       },

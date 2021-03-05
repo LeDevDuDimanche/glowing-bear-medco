@@ -2,6 +2,7 @@ import { Injectable, Output, EventEmitter } from "@angular/core";
 import { ApiExploreStatistics } from "app/models/api-request-models/survival-analyis/api-explore-statistics";
 import { ApiExploreStatisticsResponse, ApiInterval } from "app/models/api-response-models/explore-statistics/explore-statistics-response";
 import { Concept } from "app/models/constraint-models/concept";
+import { Modifier } from "app/models/constraint-models/modifier";
 import { ErrorHelper } from "app/utilities/error-helper";
 import { forkJoin, Observable } from "rxjs";
 import { timeout } from "rxjs/operators";
@@ -24,10 +25,10 @@ export class Interval {
 }
 
 export class ChartInformation {
-    intervals: Interval[]
-    unit: string
+    readonly intervals: Interval[]
+    readonly unit: string
 
-    constructor(apiResponse: ApiExploreStatisticsResponse, cryptoService: CryptoService) {
+    constructor(apiResponse: ApiExploreStatisticsResponse, cryptoService: CryptoService, public readonly treeNodeName: string, public readonly cohortName: string) {
         this.unit = apiResponse.unit
         this.intervals = apiResponse.intervals.map((i: ApiInterval) => new Interval(i, cryptoService))
     }
@@ -68,6 +69,8 @@ export class ExploreStatisticsService {
             userPublicKey: this.cryptoService.ephemeralPublicKey
         }
 
+
+
         if (concept.modifier) {
             apiRequest.concept = concept.modifier.appliedConceptPath
             apiRequest.modifier = {
@@ -90,6 +93,8 @@ export class ExploreStatisticsService {
             .pipe(timeout(ExploreStatisticsService.TIMEOUT_MS))
 
 
+        const displayedName = concept.modifier ? this.getModifierDisplayName(concept.modifier) : concept.name
+
         obs.subscribe((results: Array<ApiExploreStatisticsResponse>) => {
             console.log("Explore statistics request results ", results)
             if (results == undefined || results.length <= 0) {
@@ -97,10 +102,14 @@ export class ExploreStatisticsService {
             }
 
             //Store the clear counts within the chart information class instance
-            const chartInfo = new ChartInformation(results[0], this.cryptoService)
+            const chartInfo = new ChartInformation(results[0], this.cryptoService, displayedName, apiRequest.cohortName)
             this.ChartDataEmitter.emit(chartInfo)
         })
 
+    }
+
+    private getModifierDisplayName(m: Modifier): string {
+        return m.path.split("/").filter(s => s).pop()
     }
 
 }
